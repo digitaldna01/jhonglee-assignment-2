@@ -28,7 +28,9 @@ jobs:
     - name: Install dependencies using Makefile
       run: |
         make install
-        pip install flake8
+
+    - name: Install flake8
+      run: pip install flake8  # Ensure flake8 is installed separately
 
     - name: Run the Flask app using Makefile
       run: |
