@@ -1,0 +1,45 @@
+.body-container {
+    font-family: Helvetica, Arial, sans-serif;
+    background-color: #162636;
+}
+
+.top-margin{
+    height: 40px;
+}
+
+.title1{
+    font-size: 60px;
+    color: #FFFFFF;
+}
+
+.title2{
+    font-size: 60px;
+    color: #97A0A9;
+}
+
+.num-data{
+    font-size: 16px;
+    color: #97A0A9;
+}
+
+.text{
+    font-size: 16px;
+    color: #FFFFFF;
+}
+/* h1 {
+    margin-bottom: 20px;
+}
+
+form {
+    margin-bottom: 30px;
+}
+
+#imageContainer {
+    display: flex;
+    gap: 20px;
+}
+
+#imageContainer img {
+    max-width: 400px;
+    border: 1px solid #ccc;
+} */
