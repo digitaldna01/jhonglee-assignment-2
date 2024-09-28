@@ -19,6 +19,7 @@ def initial_capture(data):
     plt.ylabel('Y-axis')
     plt.grid()
     plt.savefig('static/initial_visualization.png')  # 이미지를 static 폴더에 저장
+    plt.close()
 
 def manual_center_pick():
     pass
