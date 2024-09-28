@@ -9,7 +9,7 @@
 </head>
 <body class="body-container">
     <div class="top-margin"></div>
-    <div class="container" style="border: 1px solid red">
+    <div class="container">
         <div class="row">
             <div class="col-7 title1">Kmean Algorithm</div>
             <div class="col-5"></div>
@@ -24,7 +24,7 @@
             <div class="col-4">
                 <div class="row align-items-end">
                     <div class="col-6 num-data">make Visualization<br> of # data:</div>
-                    <div class="col-6 " style="border: 1px solid red">
+                    <div class="col-6 ">
                         <input id="numPoints" type="number"  placeholder="# of data"/>
                     </div>
                 </div>
@@ -36,7 +36,7 @@
                 <!-- Need to fix this part -->
                 <div class="matplot">
                     <img id="data-visualization" alt="Data Visualization" style="display:none;">
-                    <div id="plotly-div" style="display:none;"></div>
+                    <div id="plotly-div" style="display:none;"></div> 
                 </div>
             </div>
             <div class="col-4">
@@ -49,7 +49,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col" style="border: 1px solid red">
+                    <div class="col">
                         <div class="row row-cols-1">
                             <div class="col text">Initialization Method</div>
                             <div class="col">
@@ -58,12 +58,12 @@
                                     <option value="random">Random</option>
                                     <option value="farthest_first">Farthest First</option>
                                     <option value="kmean_plus">KMean++</option>
-                                    <option value="manual">Menual</option>
+                                    <option value="manual">Manual</option>
                                 </select>
                             </div>
                         </div>
                     </div>
-                    <div class="col" style="border: 1px solid black">
+                    <div class="col">
                         <div class="d-grid gap-4 my-3">
                             <button type="button" class="btn btn-primary" onclick="stepThroughKMeans()">Step Through KMeans</button>
                             <button class="btn btn-primary" type="button" onclick="runToConvergence()">Run to Converge</button>
@@ -78,6 +78,7 @@
     
 
     <script src="/static/scripts.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
 </body>

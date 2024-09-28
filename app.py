@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, jsonify
 import numpy as np
 import matplotlib.pyplot as plt
 from io import BytesIO
 from kmean_implementation import KMeans, generate_dataset, initial_capture
 import os
 import glob
+import json
 
 # Path to the folder
 folder_path = 'static/step_images/'
@@ -24,7 +25,7 @@ def index():
 @app.route('/initial')
 def initial():
     global data_points
-    num_points = int(request.args.get('numPoints', 100))
+    num_points = int(request.args.get('numPoints', 300))
     
     data_points = generate_dataset(num_points)
     
@@ -50,6 +51,20 @@ def generate():
     # Perform KMeans clustering
     kmeans = KMeans(data_points, k)
     total_step = kmeans.lloyds(init_method)  # Run the KMeans algorithm
+    
+    return str(total_step)
+
+@app.route('/generate_manual')
+def generate_menual():
+    global kmeans
+    global total_step
+    k = int(request.args.get('k', 0))
+    data_selected = request.args.get('manuel_data')
+    selected_points = json.loads(data_selected)
+    
+    # Perform KMeans clustering
+    kmeans = KMeans(data_points, k)
+    total_step = kmeans.manual_lloyds(selected_points)  # Run the KMeans algorithm
     
     return str(total_step)
 
@@ -86,7 +101,7 @@ def newDataSet():
         print(f"Deleted {file}")
         
     global data_points
-    num_points = int(request.args.get('numPoints', 100))
+    num_points = int(request.args.get('numPoints', 300))
     
     data_points = generate_dataset(num_points)
     
@@ -95,10 +110,21 @@ def newDataSet():
     # Send the image back
     return send_file('static/initial_visualization.png')
 
+# pass current data points to manual plot
+@app.route('/getDataPoints')
+def get_data_points():
+    global data_points
+    if data_points is not None:
+        return jsonify(data_points.tolist())
+    return jsonify([])
 
-@app.route('/set_manual_points', methods=['POST'])
-def set_manual_points():
-    manual_points = request.json['points']
-    global data_points  # Assuming data_points is the list where you want to store these points
-    data_points = [(p['x'], p['y']) for p in manual_points]
-    return {'status': 'success'}
+@app.route('/saveMaualPoints', methods=['POST'])
+def save_manual_points():
+    selected_points = request.json.get('selectedPoints', [])
+    # 이 부분에서 필요한 동작을 수행하여 selected_points를 저장하거나 사용하세요.
+    print("Selected Points:", selected_points)
+    return jsonify({"status": "success", "message": "Selceted points saved successgfully"})
+
+# @app.route('/set_manual_points', methods=['POST'])
+# def set_manual_points():
+

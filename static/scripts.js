@@ -1,10 +1,10 @@
 
 let currentStep = 0;
 let totalSteps = 0;
-
+let selectedPoints = [];
 
 function generateInitialVisualization(){
-    const numPoints = document.getElementById('numPoints').value || 100;
+    const numPoints = document.getElementById('numPoints').value || 300;
     const url = `/initial?numPoints=${numPoints}&t=${new Date().getTime()}`;
 
     const img = document.getElementById('data-visualization');
@@ -17,8 +17,27 @@ function stepThroughKMeans() {
     if (currentStep == 0) {
         const kClusters = document.getElementById('kClusters').value;
         const initMethod = document.getElementById('initMethod').value;
-        
-        // Create the URL for the initial generation request
+
+        if(initMethod === 'manual') {
+            const encodedPoints = encodeURIComponent(JSON.stringify(selectedPoints));
+            const url = `/generate_manual?k=${kClusters}&manuel_data=${encodedPoints}`;
+
+            // Make an AJAX request to get the total steps from the server
+        fetch(url)
+            .then(response => response.text()) // Assuming the server returns a plain text with totalSteps
+            .then(data => {
+                totalSteps = parseInt(data, 10); // Convert the response to an integer
+                if (isNaN(totalSteps)) {
+                    console.error("Failed to retrieve total steps from the server.");
+                    return;
+                }
+                // Start the visualization process
+                currentStep = 1;
+                updateVisualization();
+        })
+        .catch(error => console.error("Error during initialization:", error));
+        }else{
+            // Create the URL for the initial generation request
         const url = `/generate?k=${kClusters}&init_method=${initMethod}`;
         
         // Make an AJAX request to get the total steps from the server
@@ -35,6 +54,7 @@ function stepThroughKMeans() {
                 updateVisualization();
             })
             .catch(error => console.error("Error during initialization:", error));
+        }
     } else {
         // Check if we have reached the total steps
         if (currentStep >= totalSteps) {
@@ -50,8 +70,17 @@ function stepThroughKMeans() {
 
 // Function to update the image for the current step
 function updateVisualization() {
+    const initMethod = document.getElementById('initMethod').value;
+    if (initMethod === 'manual'){
+        const canvas = document.getElementById('plotly-div');
+        canvas.style.display = 'none';
+    }
     const img = document.getElementById('data-visualization');
-    img.src = `/step?step=${currentStep}`;
+    
+    // Add a timestamp to the URL to prevent caching
+    const timestamp = new Date().getTime();
+    img.src = `/step?step=${currentStep}&t=${timestamp}`;
+    
     img.style.display = 'block'; // Show the image
     currentStep++; // Increment the current step after updating the image
 }
@@ -63,10 +92,11 @@ function runToConvergence() {
         const kClusters = document.getElementById('kClusters').value;
         const initMethod = document.getElementById('initMethod').value;
         
-        // Create the URL for the initial generation request
-        const url = `/generate?k=${kClusters}&init_method=${initMethod}`;
-        
-        // Make an AJAX request to get the total steps from the server
+        if(initMethod === 'manual') {
+            const encodedPoints = encodeURIComponent(JSON.stringify(selectedPoints));
+            const url = `/generate_manual?k=${kClusters}&manuel_data=${encodedPoints}`;
+
+            // Make an AJAX request to get the total steps from the server
         fetch(url)
             .then(response => response.text()) // Assuming the server returns a plain text with totalSteps
             .then(data => {
@@ -78,8 +108,27 @@ function runToConvergence() {
                 // Start the visualization process
                 currentStep = totalSteps;
                 updateVisualization();
-            })
-            .catch(error => console.error("Error during initialization:", error));
+        })
+        .catch(error => console.error("Error during initialization:", error));
+        }else{
+            // Create the URL for the initial generation request
+            const url = `/generate?k=${kClusters}&init_method=${initMethod}`;
+        
+            // Make an AJAX request to get the total steps from the server
+            fetch(url)
+                .then(response => response.text()) // Assuming the server returns a plain text with totalSteps
+                .then(data => {
+                    totalSteps = parseInt(data, 10); // Convert the response to an integer
+                    if (isNaN(totalSteps)) {
+                        console.error("Failed to retrieve total steps from the server.");
+                        return;
+                    }
+                    // Start the visualization process
+                    currentStep = totalSteps;
+                    updateVisualization();
+                })
+                .catch(error => console.error("Error during initialization:", error));
+        }
     } else {
         // Check if we have reached the total steps
         if (currentStep >= totalSteps) {
@@ -96,16 +145,18 @@ function runToConvergence() {
 // Function to generate a new dataset
 function generateNewDataset() {
 
-    const numPoints = document.getElementById('numPoints').value || 100;
+    const numPoints = document.getElementById('numPoints').value || 300;
     const url = `/newDataset?numPoints=${numPoints}&t=${new Date().getTime()}`;
 
     currentStep = 0;
     totalSteps = 0;
+    selectedPoints = [];
+    // Reset the dropdown menu to "Select the Initialization Method"
+    document.getElementById('initMethod').selectedIndex = 0;
 
     const img = document.getElementById('data-visualization');
     img.src = url;
     img.style.display = 'block'; // Show the image
-
 }
 
 // Function to reset the algorithm
@@ -118,95 +169,86 @@ function resetAlgorithm() {
     img.style.display = 'block'; // Show the image
     currentStep = 0;
     totalSteps = 0;
+    selectedPoints = [];
+
+    // Reset the dropdown menu to "Select the Initialization Method"
+    document.getElementById('initMethod').selectedIndex = 0;
 }
+
+
+// From here the manual Starts
 document.getElementById('initMethod').addEventListener('change', function () {
     const selectedMethod = this.value;
-    const canvas = document.getElementById('manualCanvas');
+    const canvas = document.getElementById('plotly-div');
     const img = document.getElementById('data-visualization');
 
     if (selectedMethod === 'manual') {
         img.style.display = 'none';
         canvas.style.display = 'block';
-        initManualSelection();
+
+        // Request Ajax for tne current Data points
+        fetch('/getDataPoints')
+            .then(response => response.json())
+            .then(dataPoints => {
+                // Use dataPoints to select manualy
+                initManualSelection(dataPoints);
+            })
+        
     } else {
         canvas.style.display = 'none';
         img.style.display = 'block';
     }
 });
 
-let manualPoints = [];
-let kValue = 0;
+function initManualSelection(initialData) {
+    const kClusters = parseInt(document.getElementById('kClusters').value, 10);
 
-function initManualSelection() {
-    const canvas = document.getElementById('manualCanvas');
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
-    manualPoints = [];
-    
-    // Retrieve the value of k from the input
-    kValue = parseInt(document.getElementById('kClusters').value);
+    const trace = {
+        x: initialData.map(point => point[0]),
+        y: initialData.map(point => point[1]),
+        mode: 'markers',
+        type: 'scatter',
+        marker: {color:'blue'}, // initial points in blue
+        name: 'Data Points',
+        showlegend: false
+    };
 
-    if (isNaN(kValue) || kValue <= 0) {
-        alert("Please enter a valid number of clusters (k) before selecting points.");
-        return;
-    }
+    const layout = {
+        title: 'Select k Points',
+        xaxis: { title: 'X'},
+        yaxis: {title: 'Y'},
+        dragmode: 'select',
+    };
 
-    // Add event listener for clicking on the canvas
-    canvas.addEventListener('click', selectPoint);
-}
+    Plotly.newPlot('plotly-div', [trace], layout);
 
-function selectPoint(event) {
-    if (manualPoints.length >= kValue) {
-        alert(`You have already selected ${kValue} points.`);
-        return;
-    }
+    const plotlyDiv = document.getElementById('plotly-div');
 
-    const canvas = document.getElementById('manualCanvas');
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    const ctx = canvas.getContext('2d');
+    plotlyDiv.on('plotly_click', function(data) {
+        if(selectedPoints.length < kClusters){
+            const x = data.points[0].x;
+            const y = data.points[0].y;
+            selectedPoints.push({ x, y });
+            
+            const newTrace = {
+                x: selectedPoints.map(point => point.x),
+                y: selectedPoints.map(point => point.y),
+                mode: 'markers',
+                marker: {color: 'red', size: 10, symbol: 'x'}, // Selected points in red with a border
+                type: 'scatter',
+                name: 'Selected Points',
+                hoverinfo: 'text',
+                showlegend: true
+            };
 
-    drawPoint(x, y, ctx);
-    manualPoints.push({ x: x, y: y });
+            Plotly.addTraces(plotlyDiv, newTrace); // Add the new trace with the selected points
 
-    console.log('Selected Points:', manualPoints);
-
-    if (manualPoints.length === kValue) {
-        alert(`You have selected all ${kValue} points.`);
-        // Optionally, disable further clicks or start the KMeans algorithm
-        canvas.removeEventListener('click', selectPoint);
-    }
-}
-
-function drawPoint(x, y, ctx) {
-    ctx.beginPath();
-    ctx.arc(x, y, 5, 0, 2 * Math.PI);
-    ctx.fillStyle = 'red';
-    ctx.fill();
-    ctx.stroke();
-}
-
-// Function to send manual points to the server when KMeans starts
-function startKMeansWithManualPoints() {
-    if (manualPoints.length !== kValue) {
-        alert(`Please select exactly ${kValue} points before starting the KMeans algorithm.`);
-        return;
-    }
-
-    fetch('/set_manual_points', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ points: manualPoints })
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Manual points sent successfully:', data);
-    })
-    .catch((error) => {
-        console.error('Error:', error);
+            if (selectedPoints.length === kClusters){
+                console.log('Selected Points:', selectedPoints);
+            }
+        } else{
+            alert('You have selected all k points. Run KMeans Algorithm');
+        }
     });
 }
 

@@ -141,7 +141,7 @@ class KMeans():
         elif (initialized == 'kmean_plus'):
             centers = self.kmean_plus()
         else:
-            centers = self.manual()
+            centers = self.random()
         self.capture(centers, step)
         # Manual: Users will select the initial centroids manually via point-and-click on the visualization.
         #TODO need to figure out how to click it.
@@ -180,6 +180,26 @@ class KMeans():
         
         plt.savefig(f'static/step_images/step_{output}.png')
         plt.close()
+        
+    def manual_lloyds(self, selected_points):
+        self.snaps = []
+        step = 0
+        # Initialize the Data
+        centers = np.array([[point['x'], point['y']] for point in selected_points])
+        self.capture(centers, step)
+        self.make_clusters(centers)
+        new_centers = self.compute_centers()
+        #TODO Step trought kmean 버튼 누르면 여기서 보여줘야해 어쩌먀 self.snaps[0]
+        step +=1
+        self.capture(new_centers, step)
+        while self.not_converged(centers, new_centers):
+            self.reset_cluster()
+            centers = new_centers
+            self.make_clusters(centers)
+            new_centers = self.compute_centers()
+            step += 1
+            self.capture(new_centers, step)
+        return step
 
 
 # kmean = KMeans(data, 4)
