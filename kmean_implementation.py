@@ -17,7 +17,6 @@ def initial_capture(data):
     plt.title('KMeans Clustering Data')
     plt.xlabel('X-axis')
     plt.ylabel('Y-axis')
-    plt.legend()
     plt.grid()
     plt.savefig('static/initial_visualization.png')  # 이미지를 static 폴더에 저장
 
@@ -132,19 +131,17 @@ class KMeans():
     ### KMEAN ALGORITHM
     def lloyds(self, initialized):
         self.snaps = []
+        step = 0
         # Initialize the Data
         if (initialized == "random"):
             centers = self.random()
-            output = "random.png"
         elif (initialized == 'farthest_first'):
             centers = self.farthest_first()
-            output = "fathest.png"
         elif (initialized == 'kmean_plus'):
             centers = self.kmean_plus()
-            output = "kmean++.png"
         else:
             centers = self.manual()
-        self.capture(centers, output)
+        self.capture(centers, step)
         # Manual: Users will select the initial centroids manually via point-and-click on the visualization.
         #TODO need to figure out how to click it.
         # First Clusters
@@ -152,28 +149,36 @@ class KMeans():
         self.make_clusters(centers)
         new_centers = self.compute_centers()
         #TODO Step trought kmean 버튼 누르면 여기서 보여줘야해 어쩌먀 self.snaps[0]
-        self.capture(new_centers, "current.png")
-        
+        step +=1
+        self.capture(new_centers, step)
         while self.not_converged(centers, new_centers):
             self.reset_cluster()
             centers = new_centers
             self.make_clusters(centers)
             new_centers = self.compute_centers()
-            self.capture(new_centers, "current.png")
-            self.reset_cluster()
-        return
+            step += 1
+            self.capture(new_centers, step)
+        return step
 
     ### Visualize Method 
     def capture(self, centers, output):
-        # output = "current.png"
 
-        fig, ax = plt.subplots()
-        ax.scatter(self.data[:, 0], self.data[:, 1], c=self.assignment)
-        ax.scatter(centers[:,0], centers[:, 1], c='r', marker='x',s=100, label='Centers')
-        fig.savefig(output)
+        plt.figure(figsize=(8, 6))
+    
+        # Assuming self.data contains the data points and self.labels contains cluster assignments
+        plt.scatter(self.data[:, 0], self.data[:, 1], c=self.assignment, alpha=0.6, cmap='viridis')  # Color by cluster
+
+        # Plot the centers with a different color and size
+        plt.scatter(centers[:, 0], centers[:, 1], c='red', marker='X', s=200, label='Centroids')  # Centroids
+
+        plt.title(f'KMeans Clustering Step {output}')
+        plt.xlabel('X-axis')
+        plt.ylabel('Y-axis')
+        plt.grid()
+        plt.legend()
+        
+        plt.savefig(f'static/step_images/step_{output}.png')
         plt.close()
-        self.snaps.append(im.fromarray(np.asarray(im.open(output))))
-        pass
 
 
 # kmean = KMeans(data, 4)

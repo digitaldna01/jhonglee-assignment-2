@@ -43,8 +43,8 @@
                     <div class="col" style="border: 1px solid blue">
                         <div class="row row-cols-1">
                             <div class="my-3">
-                                <label for="kClusters" class="form-label text">Number of Clusters (k):</label>
-                                <input type="number" class="form-control" id="form-control" id="kClusters" placeholder="# of Clusters">
+                                <label  class="form-label text">Number of Clusters (k):</label>
+                                <input type="number" class="form-control" id="kClusters" placeholder="# of Clusters">
                             </div>
                         </div>
                     </div>
@@ -53,7 +53,7 @@
                             <div class="col text">Initialization Method</div>
                             <div class="col">
                                 <select class="form-select my-3" id="initMethod" aria-label="Default select example">
-                                    <option selected>Select the Initialization Method</option>
+                                    <option value="" disabled selected>Select the Initialization Method</option>
                                     <option value="random">Random</option>
                                     <option value="farthest">Farthest First</option>
                                     <option value="kmean_plus">KMean++</option>
@@ -64,7 +64,7 @@
                     </div>
                     <div class="col" style="border: 1px solid black">
                         <div class="d-grid gap-4 my-3">
-                            <button type="submit" class="btn btn-primary" onclick="stepThroughkMeans()">Step Through KMeans</button>
+                            <button type="button" class="btn btn-primary" onclick="stepThroughKMeans()">Step Through KMeans</button>
                             <button class="btn btn-primary" type="button" onclick="runToConvergence()">Run to Converge</button>
                             <button class="btn btn-primary" type="button" onclick="generateNewDataset()">Generate New Dataset</button>
                             <button class="btn btn-primary" type="button" onclick="resetAlgorithm()">Reset Algorithm</button>
