@@ -5,7 +5,7 @@ FLASK_APP = app.py
 # Install dependencies
 install:
 	python3 -m venv $(VENV)
-	@pip install -r requirements.txt
+	./$(VENV)/bin/pip install -r requirements.txt
 
 # Run the web application
 
