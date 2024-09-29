@@ -32,7 +32,6 @@ function stepThroughKMeans() {
                     return;
                 }
                 // Start the visualization process
-                currentStep = 1;
                 updateVisualization();
         })
         .catch(error => console.error("Error during initialization:", error));
@@ -50,7 +49,6 @@ function stepThroughKMeans() {
                     return;
                 }
                 // Start the visualization process
-                currentStep = 1;
                 updateVisualization();
             })
             .catch(error => console.error("Error during initialization:", error));
