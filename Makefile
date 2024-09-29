@@ -1,5 +1,5 @@
 # Define your virtual environment and flask app
-VENV = myenv
+VENV = venv
 FLASK_APP = app.py
 
 # Install dependencies
