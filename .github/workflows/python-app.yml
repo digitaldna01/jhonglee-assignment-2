@@ -32,7 +32,7 @@ jobs:
     - name: Run Build
       run: |
         make run &
-        sleep sleep 10  # Sleep for 10 seconds to allow the server time to start
+        sleep 10  # Sleep for 10 seconds to allow the server time to start
       
     - name: Lint with flake8
       run: |
